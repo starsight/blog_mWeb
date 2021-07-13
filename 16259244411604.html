@@ -1,0 +1,585 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>
+    
+  埋点设计 - 
+  
+
+  </title>
+  <meta name="author" content="">
+  <meta name="description" content="">
+
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link href="asset/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="atom.xml" rel="alternate" title="" type="application/atom+xml">
+  <script src="asset/js/modernizr-2.0.js"></script>
+  <script src="asset/js/jquery.min.js"></script>
+  <style type="text/css">
+  .cat-children-p{ padding: 6px 0px;}
+  .hljs{background: none;}
+  </style>
+  <script type="text/javascript">
+  var isAddSildbar = true;
+  </script>
+  <script src="asset/js/octopress.js" type="text/javascript"></script>
+</head>
+<script type="text/javascript">
+//链接新开窗口
+function addBlankTargetForLinks () {
+  $('a[href^="http"]').each(function(){
+      $(this).attr('target', '_blank');
+  });
+}
+$(document).ready(function(event) {
+  addBlankTargetForLinks();
+});
+</script>
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="index.html"></a></h1>
+  
+    <h2></h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+
+  <li id=""><a target="self" href="index.html">Home</a></li>
+
+  <li id=""><a target="_self" href="archives.html">Archives</a></li>
+
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content"> 
+<div>
+	<article class="hentry" role="article">
+	<header>
+			  	<h1 class="entry-title">埋点设计</h1>
+				<p class="meta"><time datetime="2021-07-10T21:40:41+08:00" pubdate data-updated="true">2021/07/10</time></p>
+			 </header>
+		  	<div class="entry-content">
+			  	<p>头条的前端埋点<br/>
+<a href="https://mp.weixin.qq.com/s/QanYnjRN5TM_NlJtQzCALg">https://mp.weixin.qq.com/s/QanYnjRN5TM_NlJtQzCALg</a></p>
+
+<p>先明确埋点分类，头条定义了两种类型埋点，一种是页面事件，另一种是触发事件。<br/>
+前者又包括两部分，一种页面级别的，一种元素级别的埋点。对应于阿里的页面埋点和曝光埋点。</p>
+
+<h1 id="toc_0">页面事件</h1>
+
+<h2 id="toc_1">页面级别</h2>
+
+<p>页面在前端的定义中以location.pathname区分<br/>
+页面级别可以统计页面的可见时间和活跃时间<br/>
+可见的判断标准：（visible）页面在当前浏览器的 viewport 中，且浏览器窗口未被最小化；（invisible）页面不在当前浏览器的 viewport 中，或因浏览器最小化导致其无法被看到。<br/>
+活跃的判断标准：（active）用户在网页中有活动（例如鼠标、键盘活动及页面滚动等）；（inactive）用户在网页中没有任何活动。</p>
+
+<p>web lifecycle</p>
+
+<h3 id="toc_2">问题</h3>
+
+<ol>
+<li>单页面应用<br/>
+history或hash路由变化切换，页面不会重载。需要补偿页面termiated逻辑等。</li>
+<li>discard状态无法上报数据<br/>
+解法：提前做持久化存储localStorage（invisible时），visible时上报并清理，尽最大限度送出数据。</li>
+</ol>
+
+<h2 id="toc_3">组件级别</h2>
+
+<p>两个问题</p>
+
+<ul>
+<li>哪些组件要监控</li>
+<li>怎样统计可见时间</li>
+</ul>
+
+<h3 id="toc_4">哪些组件要监控</h3>
+
+<h4 id="toc_5">标记监控组件</h4>
+
+<p>为组件增加特殊标记属性monitor-pv data-monitor-pv（react 16仅支持data-自定义属性）</p>
+
+<p>Ant Design等组件库可能会被组件过滤，DOM元素上不存在属性。<br/>
+解法：babel插件，编译时再外层包裹一层<monitor></monitor>，同时不带任何样式，不影响原有组件。</p>
+
+<h4 id="toc_6">怎么监控</h4>
+
+<p>需要监听DOM变化<br/>
+时机：不能DOM一变化就监控，性能受不了。所有DOM操作结束之后触发。<br/>
+（注：退一步讲，如果做不了所有DOM结束后的回调，那么可以定时间隔触发，如每隔3s判一下有没有DOM变化）</p>
+
+<h3 id="toc_7">怎样统计可见时间</h3>
+
+<ul>
+<li>页面可见</li>
+<li>组件是否在viewport中</li>
+<li>组件自身是否设置可见
+<ul>
+<li>visibility: hidden</li>
+<li>display:none</li>
+<li>opacity:0</li>
+</ul></li>
+</ul>
+
+<h1 id="toc_8">触发事件</h1>
+
+<h2 id="toc_9">类指令</h2>
+
+<p>最基础的，如通过monitor-click指令<br/>
+// 指令式埋点示例<br/>
+&lt;Button<br/>
+  monitor-click={JSON.stringify({<br/>
+    type: &quot;func_operation&quot;,<br/>
+    params: { value: 3 },<br/>
+  })}</p>
+
+<blockquote>
+<p>Click Me<br/>
+</Button></p>
+</blockquote>
+
+<p>原理：<br/>
+对当前document注册监听,监听hover click input focus<br/>
+monitor会从target逐层向上查找，上层有同样指令则也上报。<br/>
+问题：</p>
+
+<ul>
+<li>数据处理不便</li>
+<li>不是所有要上报的类型都能监听到</li>
+<li>上报时机自由度不好控制（说到底还是前两条的因素）</li>
+</ul>
+
+<h2 id="toc_10">装饰器</h2>
+
+<p>（前方对客户端来说高能）</p>
+
+<pre class="line-numbers"><code class="language-ts">// @monitorBefore 使用示例
+@monitorBefore((value: string) =&gt; ({
+    type: &#39;func_operation&#39;,
+    params: { keyword: value },
+}))
+handleSearch() {
+    console.log(
+        &#39;[Decorators Demo]: this should happen AFTER a monitor event is sent.&#39;,
+    );
+}
+
+return (
+    &lt;AutoComplete
+        onSearch={handleSearch}
+/&gt;
+)
+</code></pre>
+
+<p>monitorBefore是一个高阶函数，即返回值是一个函数。具体可以参考JS的装饰器，返回值的形式很固定(target: object, name: string, descriptor: object)=&gt;{return newDescriptor}，这样就最后执行newDescriptor.value()，在这里最后是执行<code>this.defineDecorator</code></p>
+
+<pre class="line-numbers"><code class="language-text">// monitorBefore 函数源代码
+monitorBefore = (event: MonitorEvent) =&gt; {
+  return (target: object, name: string, descriptor: object) =&gt;
+    this.defineDecorator(event, descriptor, this.before);
+};
+</code></pre>
+
+<p>入参是event（可函数可对象）<br/>
+重点看下 <code>this.defineDecorator(event, descriptor, this.before);</code> </p>
+
+<pre class="line-numbers"><code class="language-ts">// defineDecorator 函数源代码
+before = (event: MonitorEvent, fn: () =&gt; any) =&gt; {
+  const that = this;
+  return function (this: any) {
+    const _event = that.evalEvent(event)(...arguments);
+    that.sendEvent(_event);
+    return fn.apply(this, arguments);
+  };
+};
+
+defineDecorator = (
+  event: MonitorEvent,
+  descriptor: any,
+  decorator: (event: MonitorEvent, fn: () =&gt; any) =&gt; any
+) =&gt; {
+    // 注意event不仅仅可以是obejct哦
+  if (isFunction(event) || isObject(event) || isArray(event)) {
+    // 里面就是具体的事件上报逻辑，同时还不能把原descriptor.value落下
+    const wrapperFn = decorator(event, descriptor.value);
+    // 这里只是传一下arguments做了个合并
+    function composedFn(this: any) {
+      return wrapperFn.apply(this, arguments);
+    }
+    // newDiscriptor诞生
+    set(descriptor, &quot;value&quot;, composedFn);
+    return descriptor;
+  } else {
+    console.error(
+      `[Monitor SDK @${decorator}] the event argument be an object, an array or a function.`
+    );
+  }
+};
+
+monitorBefore = (event: MonitorEvent) =&gt; {
+  return (target: object, name: string, descriptor: object) =&gt;
+    this.defineDecorator(event, descriptor, this.before);
+};
+</code></pre>
+
+<p><img src="media/16259244411604/16260171187666.jpg" alt=""/></p>
+
+<h3 id="toc_11">react钩子</h3>
+
+<p>useMonitor</p>
+
+<pre class="line-numbers"><code class="language-text">// useMonitor 源代码
+useMonitor = (fn: () =&gt; any, event: MonitorEvent) =&gt; {
+  if (!event) return fn;
+  const that = this;
+
+  return function (this: any) {
+    const _event = that.evalEvent(event)(...arguments);
+    that.sendEvent(_event);
+
+    return fn.apply(this, arguments);
+  };
+};
+</code></pre>
+
+			</div>
+
+		
+	  
+		<footer>
+		 <p class="meta">
+
+			
+			<span class="categories">
+			 
+			</span>
+		    </p>
+		    <p class="meta">
+		      
+		 </p>
+	    
+		<div class="sharing">
+		  
+          
+
+          
+
+		</div>
+
+	    <p class="meta">
+	    
+	        <a class="basic-alignment left" href="16260825942434.html" 
+	        title="Previous Post: Edge的版本管理方案">&laquo; Edge的版本管理方案</a>
+	    
+	    
+	        <a class="basic-alignment right" href="16116433692078.html" 
+	        title="Next Post: Java 通过 form-data 传参调用第三方接口">Java 通过 form-data 传参调用第三方接口 &raquo;</a>
+	    
+	    </p>
+	  </footer>
+	</article>
+</div>
+ <aside class="sidebar"> 
+
+	<section>
+	  <h1>Categories</h1>
+	  <ul id="recent_posts">
+	  
+	        
+	      </li>
+	   
+	  </ul>
+	</section>
+	<section>
+	  <h1>Recent Posts</h1>
+	  <ul id="recent_posts">
+	  
+	      
+		      <li class="post">
+		        <a href="16261583766683.html">Gradle</a>
+		      </li>
+	     
+	  
+	      
+		      <li class="post">
+		        <a href="16260825942434.html">Edge的版本管理方案</a>
+		      </li>
+	     
+	  
+	      
+		      <li class="post">
+		        <a href="16259244411604.html">埋点设计</a>
+		      </li>
+	     
+	  
+	      
+		      <li class="post">
+		        <a href="16116433692078.html">Java 通过 form-data 传参调用第三方接口</a>
+		      </li>
+	     
+	  
+	      
+		      <li class="post">
+		        <a href="16108992047847.html">React 使用css</a>
+		      </li>
+	     
+	  
+	      
+	   
+	  </ul>
+	</section>
+	
+</aside> </div></div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 -  -
+  <span class="credit">Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a> &nbsp;&nbsp; Theme by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+  
+/* PrismJS 1.14.0
+https://prismjs.com/download.html#themes=prism-solarizedlight&languages=markup+css+clike+javascript */
+/*
+ Solarized Color Schemes originally by Ethan Schoonover
+ http://ethanschoonover.com/solarized
+
+ Ported for PrismJS by Hector Matos
+ Website: https://krakendev.io
+ Twitter Handle: https://twitter.com/allonsykraken)
+*/
+
+/*
+SOLARIZED HEX
+--------- -------
+base03    #002b36
+base02    #073642
+base01    #586e75
+base00    #657b83
+base0     #839496
+base1     #93a1a1
+base2     #eee8d5
+base3     #fdf6e3
+yellow    #b58900
+orange    #cb4b16
+red       #dc322f
+magenta   #d33682
+violet    #6c71c4
+blue      #268bd2
+cyan      #2aa198
+green     #859900
+*/
+
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #657b83; /* base00 */
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+  background: #073642; /* base02 */
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+  background: #073642; /* base02 */
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: 1em;
+  margin: .5em 0;
+  overflow: auto;
+  border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+  background-color: #fdf6e3; /* base3 */
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #93a1a1; /* base1 */
+}
+
+.token.punctuation {
+  color: #586e75; /* base01 */
+}
+
+.namespace {
+  opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #268bd2; /* blue */
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.url,
+.token.inserted {
+  color: #2aa198; /* cyan */
+}
+
+.token.entity {
+  color: #657b83; /* base00 */
+  background: #eee8d5; /* base2 */
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #859900; /* green */
+}
+
+.token.function,
+.token.class-name {
+  color: #b58900; /* yellow */
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #cb4b16; /* orange */
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+  
+    
+
+
+</body>
+</html>

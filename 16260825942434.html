@@ -1,0 +1,618 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>
+    
+  Edge的版本管理方案 - 
+  
+
+  </title>
+  <meta name="author" content="">
+  <meta name="description" content="">
+
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link href="asset/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="atom.xml" rel="alternate" title="" type="application/atom+xml">
+  <script src="asset/js/modernizr-2.0.js"></script>
+  <script src="asset/js/jquery.min.js"></script>
+  <style type="text/css">
+  .cat-children-p{ padding: 6px 0px;}
+  .hljs{background: none;}
+  </style>
+  <script type="text/javascript">
+  var isAddSildbar = true;
+  </script>
+  <script src="asset/js/octopress.js" type="text/javascript"></script>
+</head>
+<script type="text/javascript">
+//链接新开窗口
+function addBlankTargetForLinks () {
+  $('a[href^="http"]').each(function(){
+      $(this).attr('target', '_blank');
+  });
+}
+$(document).ready(function(event) {
+  addBlankTargetForLinks();
+});
+</script>
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="index.html"></a></h1>
+  
+    <h2></h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+
+  <li id=""><a target="self" href="index.html">Home</a></li>
+
+  <li id=""><a target="_self" href="archives.html">Archives</a></li>
+
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content"> 
+<div>
+	<article class="hentry" role="article">
+	<header>
+			  	<h1 class="entry-title">Edge的版本管理方案</h1>
+				<p class="meta"><time datetime="2021-07-12T17:36:34+08:00" pubdate data-updated="true">2021/07/12</time></p>
+			 </header>
+		  	<div class="entry-content">
+			  	<blockquote>
+<p>本文由 <a href="http://ksria.com/simpread/">简悦 SimpRead</a> 转码， 原文地址 <a href="https://mp.weixin.qq.com/s/J7Jcylc6WA9zPHzUKZSCtg">mp.weixin.qq.com</a></p>
+</blockquote>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW013hKdSwuhzU0eZkHejaK8aF1z6rtzswM0woZG1KenCmlG8WzKEQ8Hg/640?wx_fmt=png" alt=""/></p>
+
+<p>不知道你有没有好奇过，像 Microsoft Edge 这种巨型项目是如何进行版本管理的？</p>
+
+<p>当然关于这个问题我就需要先解释一下，因为 Edge 是多么巨型的一个项目很多人可能并没有概念。</p>
+
+<p>事实上，其实我也没有概念，因为我知道自己接触的只是冰山一角，可能绝大多数人看这个项目的代码都像是在管中窥豹一样。</p>
+
+<p>Edge 是微软研发的一款基于 Chromium 内核的浏览器，而 Chromium 则是由 Google 推出的一个开源浏览器项目。</p>
+
+<p>那么 Chromium 有多么庞大呢？很可惜，我没有找到最新的数据，但是根据 2019 年的数据，Chromium 项目的总代码行数达到了 3400 多万行，纯代码行数（去除注释和空行）也有 2500 多万行。</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW0oBeFGjqFPtjUnjeicEOYVyV5Swn2UPia4UWOJpGkAjA8zewhRIu7SWlA/640?wx_fmt=png" alt=""/></p>
+
+<p>毫无疑问，这简直就是一艘航空母舰，因此相信没有人敢说自己对这个项目是完全了解的。</p>
+
+<p>而 Edge 相比于 Chromium 还会更大庞大一些，因为微软还会在 Chromium 的基础之上添加许许多多自己的功能。</p>
+
+<p>那么再次回到开始的问题，你有好奇过像 Edge 这种巨型项目是如何进行版本管理的吗？</p>
+
+<p>今天我们就来揭秘一下。</p>
+
+<p>首先要说明的是，接下来我要讲解的 Edge 版本管理与发布规则并不是由微软发明的，而是遵循的和 Google Chrome 完全相同的规则（毕竟是基于 Chromium 内核的项目），因此不涉及任何微软的内部机密。</p>
+
+<p>这套规则我认为是相当科学与成熟的，我敢肯定除了 Edge 和 Chrome 之外一定还存在大量成熟的项目也使用的是类似的规则。而对于一些还没有形成自己规则的小项目，我觉得正好可以趁此了解一下本篇文章中介绍的内容，让你们的版本管理变得更加科学。</p>
+
+<p>首先跟大家介绍一下 Chromium 内核版本号的概念。</p>
+
+<p>可能对浏览器比较关注的朋友或多或少有听说过，比如 Chrome 80 发布了，Chrome 90 发布了这样的新闻。这个后面的版本号对应的就是 Chromium 内核的版本号。</p>
+
+<p>许多国内浏览器也是基于 Chromium 内核开发的，它们有时也会在宣传时加上 Chromium 内核版本号的说明。</p>
+
+<p>比如 QQ 浏览器是基于 Chromium 70 内核开发的。</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW0cGrnOdFsBB2PA96FUBibia0gG5kooQvNoqNmvOsh4fOIPC4ASgpUbdwQ/640?wx_fmt=png" alt=""/></p>
+
+<p>360 安全浏览器是基于 Chromium 86 内核开发的。</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW0BibYBib82xXIiajpdE0jxB4Qgy6xLl7C6ibnTczkSPIfC8akdFfRiaZkwNg/640?wx_fmt=png" alt=""/></p>
+
+<p>那么这个内核版本号是按照什么样的规则进行升级的呢？</p>
+
+<p>其实很简单，根据 Chromium 的规则，每 6 周会升级一次内核版本号，雷打不动（从今年 9 月份开始，Chromium 会将规则改成每 4 周升级一次内核版本号，不过由于是将来时，本篇文章仍然以每 6 周进行讲解）。</p>
+
+<p>也就是说，如果当前最新的 Chromium 内核版本号是 90，那么 6 周之后就会变成 91，以此类推。</p>
+
+<p>在这 6 周时间里，会有无数代码被提交进 Chromium 的主线代码仓库中，而这些代码变更也就会将成为 Chromium 90 与 91 内核之间的所有功能差异。</p>
+
+<p>了解了这些内容之后，接下来我们回到 Edge。</p>
+
+<p>目前我所在的团队是微软的 Edge Android 团队，Edge Android 版的官方上架渠道就只有一个：Google Play。（虽然在国内的一些手机应用商店也能下载到 Edge，但是这些商店的版本有些可能是从其他地方爬来的，有些则更新不太及时）</p>
+
+<p>如果你尝试在 Google Play 中搜索 Edge，你会发现其实 Edge 并不是只有 1 个版本，而是会有 4 个。</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW05ZsfCmo6cqdJIXQXmWSDFCQAv3KpyiaWd0BL2TE9byyVTKpfRQPEfZQ/640?wx_fmt=png" alt=""/></p>
+
+<p>这对于一些小白用户可能直接就给整懵圈了，搞这么多版本干啥，我都不知道该用哪个好了。</p>
+
+<p>是啊，直接就上架一个稳定版不就好了吗？为什么还要分什么 Canary、Dev、Beta 版本？</p>
+
+<p>这是因为，每个版本都有它们各自不同的作用，4 个版本结合到一起则能让整个项目变得格外稳定和健壮。</p>
+
+<p>接下来我就逐个介绍一下这 4 个版本它们分别的作用和存在的意义。</p>
+
+<p><strong>Microsoft Edge Canary</strong></p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW0yoa6QJDFUXxoibUUwToleompu2FwKj1KyM9qO6ZPAibTCOEIWS8EKjicQ/640?wx_fmt=png" alt=""/></p>
+
+<p>Canary 是金丝雀的意思，这个单词在软件开发行业中很常见，但是真正了解它含义的人却并不多。</p>
+
+<p>早期这个词汇是用在采矿领域里的。矿工会带着一只金丝雀进入矿坑采矿，由于金丝雀对各种的有害气体比较敏感，在人类发觉有害气体前，金丝雀就会先死掉，以此让矿工能够及时发现有害气体，尽早做出防护。</p>
+
+<p>到了软件行业中，Canary 也是同样的意思，它的主要作用就是让我们能够在很早期的时候就发现软件中存在的问题。</p>
+
+<p>如果你选择成为 Edge Canary 的用户，那么你将能够在第一时间体验 Edge 中加入的各种最新功能。因为 Canary 的发布频率是每天发布一个版本。</p>
+
+<p>也就是说今天我编写的某个功能，明天你就能在 Edge Canary 中体验到了。</p>
+
+<p>当然，除了体验新功能之外，你还会体验到很多新 Bug。因为正如刚才所说，Canary 版就是用来在很早期的时候发现问题的，所以它相当不稳定。如果出现什么功能缺失或者崩溃的情况，请不要惊讶，我们也会根据用户测出来的各种问题及时进行修复。</p>
+
+<p>不过这种版本发布频率可能并不适用于每个项目，如果是一些比较小的项目的话，一天时间可能根本不会有太大的代码变化，这样的话每天发布一个版本意义也不是很大。</p>
+
+<p>而 Edge 则每天会有海量的代码进入到主线的代码库当中。现在的 Edge 是全平台共用同一套代码库的，每天会有来自 PC 端的代码更新，也会有来自移动端的代码更新，还会有从 Chromium 拉取下来的代码更新。所以，每天的 Canary 版本都会有许多不一样的地方，虽然我们也不知道具体有哪些不一样（毕竟每个人都只负责自己的一小部分），但神通广大的网友总是可以发现，并帮忙提出问题。</p>
+
+<p>这也是 Canary 版本最大的意义所在。</p>
+
+<p><strong>Microsoft Edge Dev</strong></p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW0zoS5b4OCzVLyL7GhXSMAz6p6twCjnTrRWIrrCBGibkkAuyNsU8xLFzg/640?wx_fmt=png" alt=""/></p>
+
+<p>Edge Dev 和 Edge Canary 其实是有点类似的。从名字你就可以看出，它的目的也是为了让用户在早期的开发阶段就能体验到 Edge 的最新功能。</p>
+
+<p>但是 Dev 版并没有 Canary 版那么激进，它不是每天发布一个版本，而是每周发布一个版本。</p>
+
+<p>是的，它们的区别只有这么多。</p>
+
+<p>但是别看就只是一个发布频率的区别，它们所面向的用户群体就完全不一样了。</p>
+
+<p>Canary 版面向的群体是那种发烧友级别的用户，他们愿意每天更新一个变化可能并不是那么大的版本，只是为了第一时间就能体验到 Edge 团队前一天开发出来的新功能。</p>
+
+<p>而 Dev 版面向的用户群体则更加保守一些，每天一更新对他们来说太频繁了（我个人就非常不喜欢更新特别频繁的应用），每周更新一次，体验这一周以来 Edge 总体引入的各种新功能，对他们来说刚刚好。</p>
+
+<p>另外，Dev 版相比于 Canary 版也会稳定许多。如果你是一名 Canary 版的用户，今天本来还能正常使用着浏览器，结果明天更新了一个新版本，或许就会出现启动闪退的情况。</p>
+
+<p>而 Dev 版出现这样情况的概率就会大大降低，因为它一周只会发布一个版本，Canary 版上遇到的那些问题有很大的概率在 Dev 版上都会被修复，所以相对来说你可以比较放心地去更新 Dev 版。</p>
+
+<p>总结一下，Dev 版更加适合于那些既想要体验新功能，又希望版本能够比较稳定的用户。</p>
+
+<p><strong>Microsoft Edge Beta</strong></p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW0ric9aHglJkbhqO3vgmWaOxT6eZ1zfY2IqMUZAP3sxbhjQvkFRajmkSg/640?wx_fmt=png" alt=""/></p>
+
+<p>如果仅从更新频率上来看的话，Edge Beta 和 Edge Dev 的更新频率几乎是差不多的，Beta 版也是每周发布一个版本。</p>
+
+<p>但是，Beta 版和 Dev 版的作用是完全不同的。</p>
+
+<p>Beta 在软件行业中通常就是快要发布的意思，主体功能已经稳定，也不会再发生什么大的变更，就差临门一脚正式上线了。</p>
+
+<p>Edge Beta 也是这个意思。</p>
+
+<p>刚才有说过，Dev 版每周会更新一次。在经历 6 周的迭代之后，这个 Dev 版就会转变成 Beta 版。然后 Beta 版继承 Dev 版的内核版本号，Dev 版的内核版本号加 1。</p>
+
+<p>举个例子，比如 Edge 正在基于 Chromium 90 内核来开发新功能，开发 6 周之后，这个版本会变成 Beta 版，于是 Edge 就会发布一个基于 Chromium 90 的 Beta 版，同时正在开发的代码主线内核会变成 Chromium 91。</p>
+
+<p>在这种情况下，Canary 和 Dev 版的用户很快就能体验到基于 Chromium 91 内核的版本了，而 Beta 版的用户才刚刚用上基于 Chromium 90 的版本。</p>
+
+<p>Beta 版的发布也就意味着这个开发周期中所有的功能都已经做完了，它接下来所肩负的使命就是将这个开发周期中所做的这些功能稳定地交付给用户，而不是额外再引入一些下个开发周期中的新功能。</p>
+
+<p>要知道，经历 6 周的迭代开发之后，功能性方面虽然已经是完善了，但是稳定性方面还没有任何保证，这也是 Beta 版的价值所在。</p>
+
+<p>和 Dev 版类似，Beta 版也是每周会发布一个版本，但是这些版本不会再增加任何新功能，只是会修复各种线上用户发现的 Bug，以此不断提升 Beta 版本的稳定性。</p>
+
+<p><strong>Microsoft Edge</strong></p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt7JQjI5kBPfl9jY1QG6CBW0D79H3J0feLNUUuHIbC0De5sQoZwQtQdUic0PptlEWibibhmYp6CtqkfLw/640?wx_fmt=png" alt=""/></p>
+
+<p>Beta 版本再次经历 6 周的迭代之后，该修的 Bug 基本也就都修完了，那么当前的 Beta 版可以说是一个相当稳定的版本，它会转变成 Microsoft Edge 的正式版发布上线。</p>
+
+<p>如果我们审视一下当前的时间节点，当第 6 周的 Beta 版转变成正式版时，其实也正是第 6 周的 Dev 版转变成 Beta 版时。这样 Beta 版又会开始一个新的 6 周的稳定性测试周期，而 Canary 和 Dev 则会开始一个新的 6 周的开发周期，以此不断往复。</p>
+
+<p>所以，按照这种规则，假如你是一位 Edge 正式版的用户，目前你使用的版本是 Edge 90，那么此时的 Beta 版一定是 Edge 91，而 Canary 和 Dev 版则已经是 Edge 92 了。</p>
+
+<p>这也是为什么说，Edge 使用的这套版本管理和发布规则（也是 Chromium 使用的规则）相当成熟与科学，它保证了每一个发布出去的正式版本都是非常稳定的，并且每一个版本也都有充足的生命周期。</p>
+
+<p>6 周的功能开发加上 6 周的稳定性测试，使得所有应该发现的 Bug 在开发和测试阶段就已经发现并解决完了，因此可以放心大胆地上线正式版。相比国内一些之前比较热门的热修复技术，在海外一是不能用，二是也没有必要，因为即使不借助这些事后补救的黑科技，我们使用软件工程与管理的方式也可以很好地在事前就保证好版本的稳定性。</p>
+
+<p>至于每个正式版本的生命周期其实也是一件很重要的事情。我发现我自己使用的一些 App，完全没有任何规律性的更新节奏，经常是时不时给你来个新版本上线。</p>
+
+<p>我通常是一个有更新必升的人，但是有些 App 今天升完之后，两天后又告诉你有个新版本上线，更新日志就是修复了一些 Bug，升级完之后再过两天又弹出一个更新提醒，更新日志又是修复了一些 Bug。</p>
+
+<p>这种就不是一个出色的 App 应该有的表现，他们是在拿正式版的用户当 Canary 版去测试，时间久了我就再也不想升级这种 App 了，因为升完之后没过两天还会再让你升级。</p>
+
+<p>而 Edge 的这种机制充分保障了每个正式版本的生命周期，它固定每 6 周更新一次，既不会更新的太频繁导致用户厌烦，也不会太久不更新导致用户流失，并且每次更新都对应了一个全新的 Chromium 内核版本。</p>
+
+<p>所以，这 4 个版本分别的作用和面向的用户群体相信大家已经明白了。Canary 版面向的是发烧友用户；Dev 版面向的是既想要尝鲜又追求一定稳定性的用户；Beta 版面向的是希望提前 6 周体验到最新正式版本，但能接受一定 Bug 的用户；正式版面向的则是最广大的普通用户群体。</p>
+
+<p>现在你知道，像 Edge 这种巨型项目是如何进行版本管理的了吧。</p>
+
+<p>介绍完了关于 Edge 的这些知识点，接下来再跟大家讲一讲现在移动端 Edge 的现状吧。</p>
+
+<p>如果你是一位细心的用户，你可能会发现，目前 Google Play 上 Edge 正式版竟然还是基于 Chromium 77 内核的，而相比之下，Chrome 已经是基于 Chromium 91 的内核了。</p>
+
+<p>根据刚才 6 周升一版本的频率，77 的内核差不多已经是 Chromium 两年前的版本了。</p>
+
+<p>为什么会有这么大的差距呢？</p>
+
+<p>这是因为，一开始 PC 端的 Edge 并不是基于 Chromium 开发的，使用的是微软自己的浏览器内核，而移动端的 Edge 则是使用的 Chromium 的内核。那个时候 PC 端和移动端的代码是完全不相干的，大家各做各的。</p>
+
+<p>后来微软放弃了自己的浏览器内核，PC 端的 Edge 也转向了 Chromium，这个时候 Edge 部门就做出了要求全平台统一代码库的决定。</p>
+
+<p>但全平台统一代码库并不是那么简单的一件事，这意味着移动端和 PC 端再也不能各做各的了，而是大家要统一步伐，统一进度，统一内核版本号。</p>
+
+<p>于是，移动端的 Edge 从那个时候开始就没有再升级过 Chromium 的内核，而是花了近两年的时间去做了一个全新的全平台聚合的版本。它将会基于 Chromium 最新的内核版本推出，并且以后也会实时基于 Chromium 的最新内核同步推出 Edge 的新版本（最多可能会有几天延迟）。</p>
+
+<p>而这样一个全平台聚合的全新 Edge 将会于本月下旬推出，到时候你们将会发现 Edge 的内核版本会从 Chromium 77 直接跃升至 Chromium 92，相当于是一次革命性的升级。</p>
+
+<p>不过，你也可以选择不用等到本月下旬，而是今天就去尝试全新版的 Edge。因为根据刚才讲过的内容，Edge Beta 版需要迭代 6 周之后才能转变成 Edge 正式版，也就是说现在 Edge Beta 早已是基于 Chromium 92 的版本，并且一直在测试当中了。</p>
+
+<p>如果大家有兴趣的话，欢迎加入 Edge Beta 版的阵营，除了能体验最新内核的 Edge 之外，还能帮助我们测试出更多的问题，以在几周之后向广大用户发布一个更加稳定的正式版 Edge。</p>
+
+<p>Edge Beta 的下载地址是：</p>
+
+<blockquote>
+<p><a href="https://play.google.com/store/apps/details?id=com.microsoft.emmx.beta">https://play.google.com/store/apps/details?id=com.microsoft.emmx.beta</a></p>
+</blockquote>
+
+<p>注：需手机可以访问 Google Play。</p>
+
+<p>推荐阅读：<a href="http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&amp;mid=2650257248&amp;idx=1&amp;sn=0f5621ada18100be45ddd81f2b28a05e&amp;chksm=8863460fbf14cf19fe22849f25fd724ab4c0d5f006c64086370dca43d8f839fc3e84b9b2f804&amp;scene=21#wechat_redirect"></a></p>
+
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&amp;mid=2650248955&amp;idx=1&amp;sn=0c5237154c4c8de2ca635f8a578aa701&amp;chksm=88636794bf14ee823e8c11854b5c014e49a4af425c2947e7c62f3ce139062b5560b4c44e3d4f&amp;scene=21#wechat_redirect">我的新书，《第一行代码 第 3 版》已出版！</a>  </p>
+
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&amp;mid=2650257034&amp;idx=1&amp;sn=9dec39cd663d1b716ae307d8d1faece6&amp;chksm=886347e5bf14cef3acccd7f81b46ef746c4d730cbdbc7b163f0ba13b2a3c0449e3ab67e63d93&amp;scene=21#wechat_redirect">我的故事登上了 Android 开发者的官网</a>  </p>
+
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&amp;mid=2650255759&amp;idx=1&amp;sn=bdbc47ac35d5a1585cbad8fefd6ed8ae&amp;chksm=886340e0bf14c9f6dab466d4757aa961a499a87e787e464fe0e1b6c4ad2c9fd683e5a2dad495&amp;scene=21#wechat_redirect"></a><a href="http://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&amp;mid=2650255459&amp;idx=1&amp;sn=f0fdd4e7c9961ceb8cdbdebba21d5974&amp;chksm=8863410cbf14c81a593f5b5442e0e1fe0a02413f74688a0f8b4a00c4f17a5ea332c0615a70db&amp;scene=21#wechat_redirect">在微软工作 100 天，谈谈我眼中的微软</a></p>
+
+<p>欢迎关注我的公众号</p>
+
+<p>学习技术或投稿</p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz/wyice8kFQhf4Mm0CFWFnXy6KtFpy8UlvN0DOM3fqc64fjEj9tw23yYSqujQjSQoU1rC0vicL9Mf0X6EMR4gFluJw/640.png?wx_fmt=png" alt=""/></p>
+
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/v1LbPPWiaSt6FSn51QbdP1ic92cjsQM7LkBCfnaJMtcibMw9vYtdQ6QQM3CcFFbGqMoNucFlBRJw9E6VQWYk30ficw/640?wx_fmt=jpeg" alt=""/></p>
+
+<p>长按上图，识别图中二维码即可关注</p>
+
+<hr/>
+
+<p>初看是Dev和Beta的关系有点混乱，其实可以转换下理解成集成区的概念。dev和beta的发版周期都是一周。<br/>
+前六周，每周末发dev版本，之后冻结集成，再接下来的六周内，每周末都会打包重新发布，这个就是Beta版本，这六周进的内容不会是新需求，基本都是bugfix或存量需求迭代。相当于在进紧急集成。</p>
+
+<p>1周：1.0-dev<br/>
+6周：1.0-beta，同时开启下一个dev周期 1.1-dev<br/>
+12周：1.0-beta变成正式版1.0；1.1-dev变成1.1-beta；开启下一个dev周期1.2-dev</p>
+
+			</div>
+
+		
+	  
+		<footer>
+		 <p class="meta">
+
+			
+			<span class="categories">
+			 
+			</span>
+		    </p>
+		    <p class="meta">
+		      
+		 </p>
+	    
+		<div class="sharing">
+		  
+          
+
+          
+
+		</div>
+
+	    <p class="meta">
+	    
+	        <a class="basic-alignment left" href="16261583766683.html" 
+	        title="Previous Post: Gradle">&laquo; Gradle</a>
+	    
+	    
+	        <a class="basic-alignment right" href="16259244411604.html" 
+	        title="Next Post: 埋点设计">埋点设计 &raquo;</a>
+	    
+	    </p>
+	  </footer>
+	</article>
+</div>
+ <aside class="sidebar"> 
+
+	<section>
+	  <h1>Categories</h1>
+	  <ul id="recent_posts">
+	  
+	        
+	      </li>
+	   
+	  </ul>
+	</section>
+	<section>
+	  <h1>Recent Posts</h1>
+	  <ul id="recent_posts">
+	  
+	      
+		      <li class="post">
+		        <a href="16261583766683.html">Gradle</a>
+		      </li>
+	     
+	  
+	      
+		      <li class="post">
+		        <a href="16260825942434.html">Edge的版本管理方案</a>
+		      </li>
+	     
+	  
+	      
+		      <li class="post">
+		        <a href="16259244411604.html">埋点设计</a>
+		      </li>
+	     
+	  
+	      
+		      <li class="post">
+		        <a href="16116433692078.html">Java 通过 form-data 传参调用第三方接口</a>
+		      </li>
+	     
+	  
+	      
+		      <li class="post">
+		        <a href="16108992047847.html">React 使用css</a>
+		      </li>
+	     
+	  
+	      
+	   
+	  </ul>
+	</section>
+	
+</aside> </div></div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 -  -
+  <span class="credit">Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a> &nbsp;&nbsp; Theme by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+  
+/* PrismJS 1.14.0
+https://prismjs.com/download.html#themes=prism-solarizedlight&languages=markup+css+clike+javascript */
+/*
+ Solarized Color Schemes originally by Ethan Schoonover
+ http://ethanschoonover.com/solarized
+
+ Ported for PrismJS by Hector Matos
+ Website: https://krakendev.io
+ Twitter Handle: https://twitter.com/allonsykraken)
+*/
+
+/*
+SOLARIZED HEX
+--------- -------
+base03    #002b36
+base02    #073642
+base01    #586e75
+base00    #657b83
+base0     #839496
+base1     #93a1a1
+base2     #eee8d5
+base3     #fdf6e3
+yellow    #b58900
+orange    #cb4b16
+red       #dc322f
+magenta   #d33682
+violet    #6c71c4
+blue      #268bd2
+cyan      #2aa198
+green     #859900
+*/
+
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #657b83; /* base00 */
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+  background: #073642; /* base02 */
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+  background: #073642; /* base02 */
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: 1em;
+  margin: .5em 0;
+  overflow: auto;
+  border-radius: 0.3em;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+  background-color: #fdf6e3; /* base3 */
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #93a1a1; /* base1 */
+}
+
+.token.punctuation {
+  color: #586e75; /* base01 */
+}
+
+.namespace {
+  opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #268bd2; /* blue */
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.url,
+.token.inserted {
+  color: #2aa198; /* cyan */
+}
+
+.token.entity {
+  color: #657b83; /* base00 */
+  background: #eee8d5; /* base2 */
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #859900; /* green */
+}
+
+.token.function,
+.token.class-name {
+  color: #b58900; /* yellow */
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #cb4b16; /* orange */
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+  
+    
+
+
+</body>
+</html>
